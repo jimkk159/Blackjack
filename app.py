@@ -1,88 +1,116 @@
+import random
 
+from sqlalchemy import false, true
 
-def main():
+class Blackjack:
 
-    # Setting Deck
-    deck_num = 0
-    poker_deck = ["A","K","Q","J","10","9","8","7","6","5","4","3","2"]
+    def __init__(self) -> None:
+
+        # Setting Deck
+        self.deck_num = 4
+        self.suits = ["spade", "heart", "diamond", "club"]
+        self.poker_symbol = ["A","K","Q","J","10","9","8","7","6","5","4","3","2"]
+        self.poker_value_dict = {"A":11,"K":10,"Q":10,"J":10,"10":10,"9":9,"8":8,"7":7,"6":6,"5":5,"4":4,"3":3,"2":2}
+        self.poker_deck = [ {symbol : {"suit": suit}} for symbol in self.poker_symbol for suit in self.suits ]
+        self.deck = self.poker_deck * self.deck_num
+
+        print(self.poker_deck)
+        # # Setting Player
+        # self.bet = 5
+        # self.player_num = 1
+        # self.player_cards = []
+        # self.players_money = []
+
+        # # Setting Banker
+        # self.banker = []
+
+        # self.shuffle(self.deck)
+        # self.banker = []
+        # self.player_cards = self.reset_player(self.player_num)
+        # self.deal_to_all()
+
+    # Game Setting
+    # TODO Choice deck number
+
+    def is_insurance():
+        pass
     
+    def shuffle(self, deck : list):
+        random.shuffle(deck)
 
-    # Setting Player
-    player_num = 0
-    player_in_hand = []
-    players_in_hand = []
-    players_money = []
+    # Reset Player Card
+    def reset_player(self, player_num):
 
-    # Setting Banker
-    banker = []
-    players_in_hand = []
+        return [ [] * player_num ]
 
+    # Game Start
+    def deal_to_all(self):
+        
+        # To each player
+        for player_card in self.player_cards:
+            self.deal(player_card, true)
 
-# Game Setting
-def choice_deck_num():
-    pass
+        # To banker
+        self.deal(self.banker, false)
 
-def is_insurance():
-    pass
+        # To each player
+        for player_card in self.player_cards:
+            self.deal(player_card, true)
 
-# Game Start
-def bet():
-    pass
+    def deal(self, cards_in_hand : list, faced):
+        card = self.deck.pop()
+        cards_in_hand.append({card : [self.poker_dict[card], faced]})
 
-def shuffle(deck):
-    pass
+    def check_bust(self, cards_in_hand):
+        for card,  in cards_in_hand.items():
+            pass
 
-def deal(to_who, card_num):
-    pass  
+    def ask_insurance():
+        pass
 
-def check():
-    pass
+    def raise_():
+        pass
 
-def ask_insurance():
-    pass
+    def fold():
+        pass
 
-def raise_():
-    pass
+    def split():
+        pass
 
-def fold():
-    pass
+    def hit():
+        pass
 
-def split():
-    pass
+    def stand():
+        pass
 
-def hit():
-    pass
+    def double_down():
+        pass
 
-def stand():
-    pass
+    def bust():
+        pass
 
-def double_down():
-    pass
+    # Game End
+    def judge():
+        pass
 
-def bust():
-    pass
+    def next():
+        pass
 
-# Game End
-def judge():
-    pass
+    def bet():
+        pass
 
-def next():
-    pass
+    def stud():
+        pass
 
-def bet():
-    pass
+    def fold():
+        pass
 
-def stud():
-    pass
+    def push():
+        pass
 
-def fold():
-    pass
-
-def push():
-    pass
-
-def surrender():
-    pass
+    def surrender():
+        pass
 
 if __name__ == "__main__":
-    main()
+
+    game = Blackjack()
