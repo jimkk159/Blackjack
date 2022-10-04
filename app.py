@@ -1,18 +1,21 @@
 import random
 
+
 class Player:
 
     def __init__(self, id_, money=100, bet=5) -> None:
         self.id = id_
         self.bet = bet
         self.money = money
-        self.card = []
+        self.cards = []
+        self.insurance = False
+        self.result = ""
 
 class Blackjack:
 
     def __init__(self) -> None:
 
-        self.game_result = ""
+        self.game_end = True
 
         # Setting Deck
         self.deck_num = 1
@@ -25,33 +28,26 @@ class Blackjack:
         self.deck = self.poker_deck * self.deck_num
 
         # Setting Player
-        self.insurance = False
         self.player_num = 2
-        self.players_money = 100
-        self.players_bet = 5
         self.players = []
         self.create_player(self.player_num)
-        print(self.players[0].money)
+
         # Setting Banker
         self.banker = []
 
         self.shuffle(self.deck)
-        # self.game_restart()
 
-        # self.game_restart()
-        #
-        # while self.game_end:
-        #
-        #     self.game_restart()
-        #
-        #     self.player_cards[0] = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True}, {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
-        #
-        #     self.is_insurance()
-        #
-        #     if self.check_blackjack(self.player_cards[0]):
-        #         continue
-        #
-        #
+        while self.game_end:
+            self.game_restart()
+
+            self.players[0].cards = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
+                                  {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
+
+            self.is_insurance()
+            self.check_blackjack()
+
+            self.game_end = False
+
         # print(self.player_cards[1])
         # print(self.check_cards_blackjack(self.player_cards[0]))
 
@@ -65,21 +61,19 @@ class Blackjack:
     # TODO Choice deck number
     def game_restart(self):
 
-        self.game_result = ""
-        self.insurance = False
-
         # Setting Player
-
-        # Check Player bet
         self.player_num = 2
         # self.player_num = int(input("How many players want to participate?"))
 
         # Set Player bet
+        # Check Player bet
         self.set_bet()
 
+
+        self.reset_result()
+        self.reset_insurance()
         self.reset_cards()
         self.deal_to_all()
-
 
     def shuffle(self, deck: list):
         random.shuffle(deck)
@@ -89,7 +83,19 @@ class Blackjack:
 
         for player in self.players:
             # player["bet"] = int(input("How much money do you want to bet?"))
-            player["bet"] = 5
+            player.bet = 5
+
+    # Reset Result
+    def reset_result(self):
+
+        for player in self.players:
+            player.result = ""
+
+    # Reset Insurance
+    def reset_insurance(self):
+
+        for player in self.players:
+            player.insurance = False
 
     # Reset Cards in hand
     def reset_cards(self):
@@ -99,21 +105,21 @@ class Blackjack:
 
         # Reset Player
         for player in self.players:
-            player["cards"] = []
+            player.cards = []
 
     # Game Start
     def deal_to_all(self):
 
         # To each player
         for player in self.players:
-            self.deal(player["cards"])
+            self.deal(player.cards)
 
         # To banker
         self.deal(self.banker, faced=False)
 
         # To each player
-        for player_card in self.players:
-            self.deal(player["cards"])
+        for player in self.players:
+            self.deal(player.cards)
 
         # To banker
         self.deal(self.banker)
@@ -122,7 +128,6 @@ class Blackjack:
         card = self.deck.pop()
         card["faced"] = faced
         cards_in_hand.append(card)
-
 
     def check_bust(self, cards_in_hand):
 
@@ -162,26 +167,31 @@ class Blackjack:
         return False
 
     def is_insurance(self):
-        if self.banker[1]["symbol"] in ["A", "K", "Q", "J", "10"]:
-            choice = input("Want to buy a insurande?")
-            if choice == "y":
-                self.insurance = True
+
+        if self.banker[1]["symbol"] == "A":
+            for player in self.players:
+                choice = input("Want to buy a insurande?")
+                if choice == "y":
+                    player.insurance = True
 
     def check_blackjack(self, player_cards):
 
         if self.check_cards_blackjack(self.banker):
 
             if self.check_cards_blackjack(player_cards):
-                self.game_result = "push"
+                return "push"
             else:
-                self.game_result = "lose"
-            return True
+                return "lose"
 
         if self.check_cards_blackjack(player_cards):
-            self.game_result = "win"
-            return True
+            return "win"
 
-        return False
+        return ""
+
+    def check_all_blackjack(self):
+
+        for player in self.players:
+            player.result = self.check_blackjack(player.cards)
 
     # def raise_():
     #     pass
