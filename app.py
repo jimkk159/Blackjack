@@ -3,8 +3,12 @@ import random
 
 class Card:
 
-    def __init__(self):
-        pass
+    def __init__(self, symbol, suit, faced=True):
+        # self.id = id_
+        self.symbol = symbol
+        self.suit = suit
+        # self.value = value
+        self.faced = faced
 
 
 class Player:
@@ -35,27 +39,33 @@ class Blackjack:
         self.deck = self.poker_deck * self.deck_num
 
         # Setting Player
-        self.player_num = 2
+        self.player_num = 3
         self.players_in = []
         self.players_out = []
         self.create_player(self.player_num)
 
         # Setting Banker
         self.banker = []
-
+        self.min_bet = 5
         self.shuffle(self.deck)
 
         while self.game_end:
             self.game_restart()
 
-            # self.players_in[0].cards = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
-            #                             {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
-
+            self.players_in[0].cards = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
+                                        {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
+            self.players_in[2].cards = [{'symbol': 'J', 'suit': 'spade', 'value': 10, 'faced': True},
+                                        {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
             print(self.banker)
             print(self.players_in[0].cards)
             print(self.players_in[1].cards)
+            print(self.players_in[2].cards)
             self.is_insurance()
             self.check_blackjack()
+            print()
+            print(len(self.players_in))
+            print(len(self.players_out))
+
             self.choice()
             if self.banker_time() == "banker lose":
                 # Return money to players
@@ -79,8 +89,9 @@ class Blackjack:
         self.player_num = 2
         # self.player_num = int(input("How many players want to participate?"))
 
+        self.reset_player()
+
         # Set Player bet
-        # Check Player bet
         self.set_bet()
 
         self.reset_result()
@@ -91,12 +102,30 @@ class Blackjack:
     def shuffle(self, deck: list):
         random.shuffle(deck)
 
+    # Reset Player
+    def reset_player(self):
+
+        while self.players_out:
+            self.players_in.append(self.players_out.pop())
+        self.players_in.sort(key=lambda x: x.id)
+
     # Reset Cards in hand
     def set_bet(self):
 
         for player in self.players_in:
-            # player["bet"] = int(input("How much money do you want to bet?"))
-            player.stake = 5
+
+            while True:
+                player.stake = int(input("How much money do you want to bet?"))
+
+                # Check Player bet
+                if player.stake >= player.money:
+                    player.stake = player.money
+                    print("All in")
+
+                if player.stake < self.min_bet:
+                    print(f"At least {self.min_bet} dollar")
+                    continue
+                break
 
     # Reset Result
     def reset_result(self):
@@ -186,6 +215,7 @@ class Blackjack:
 
     def check_blackjack(self):
 
+        out_game = []
         for player in self.players_in:
 
             if self.check_cards_blackjack(self.banker):
@@ -196,7 +226,21 @@ class Blackjack:
                     player.result = "lose"
 
             if self.check_cards_blackjack(player.cards):
-                player.result = "win"
+                player.result = "blackjack"
+                out_game.append(player.id)
+
+        self.player_rest(out_game)
+
+    def player_rest(self, players_out):
+
+        while players_out:
+            out_player_id = players_out.pop()
+            pick_id = 0
+            for num in range(len(self.players_in)):
+                if self.players_in[num].id == out_player_id:
+                    pick_id = num
+                    break
+            self.players_out.append(self.players_in.pop(pick_id))
 
     def choice(self):
 
@@ -268,13 +312,11 @@ class Blackjack:
                 player.money += 2 * player.stake
 
             if player.result == "lose":
-
                 player.money -= player.stake
-
-
 
             if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
                 player.money += player.stake
+
 
 if __name__ == "__main__":
     game = Blackjack()
