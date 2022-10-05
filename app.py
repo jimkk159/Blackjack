@@ -6,15 +6,17 @@ class Card:
     def __init__(self):
         pass
 
+
 class Player:
 
     def __init__(self, id_, money=100, bet=5):
         self.id = id_
-        self.bet = bet
+        self.stake = bet
         self.money = money
         self.cards = []
         self.insurance = False
         self.result = ""
+
 
 class Blackjack:
 
@@ -34,7 +36,8 @@ class Blackjack:
 
         # Setting Player
         self.player_num = 2
-        self.players = []
+        self.players_in = []
+        self.players_out = []
         self.create_player(self.player_num)
 
         # Setting Banker
@@ -45,19 +48,28 @@ class Blackjack:
         while self.game_end:
             self.game_restart()
 
-            self.players[0].cards = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
-                                    {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
+            # self.players_in[0].cards = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
+            #                             {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
 
+            print(self.banker)
+            print(self.players_in[0].cards)
+            print(self.players_in[1].cards)
             self.is_insurance()
             self.check_blackjack()
             self.choice()
+            if self.banker_time() == "banker lose":
+                # Return money to players
+                pass
+
+            self.compare_cards()
+            self.give_money()
             self.game_end = False
 
     def create_player(self, player_num):
 
         for id_ in range(player_num):
             player = Player(id_=id_)
-            self.players.append(player)
+            self.players_in.append(player)
 
     # Game Setting
     # TODO Choice deck number
@@ -71,7 +83,6 @@ class Blackjack:
         # Check Player bet
         self.set_bet()
 
-
         self.reset_result()
         self.reset_insurance()
         self.reset_cards()
@@ -83,20 +94,20 @@ class Blackjack:
     # Reset Cards in hand
     def set_bet(self):
 
-        for player in self.players:
+        for player in self.players_in:
             # player["bet"] = int(input("How much money do you want to bet?"))
-            player.bet = 5
+            player.stake = 5
 
     # Reset Result
     def reset_result(self):
 
-        for player in self.players:
+        for player in self.players_in:
             player.result = ""
 
     # Reset Insurance
     def reset_insurance(self):
 
-        for player in self.players:
+        for player in self.players_in:
             player.insurance = False
 
     # Reset Cards in hand
@@ -106,21 +117,21 @@ class Blackjack:
         self.banker = []
 
         # Reset Player
-        for player in self.players:
+        for player in self.players_in:
             player.cards = []
 
     # Game Start
     def deal_to_all(self):
 
         # To each player
-        for player in self.players:
+        for player in self.players_in:
             self.deal(player.cards)
 
         # To banker
         self.deal(self.banker, faced=False)
 
         # To each player
-        for player in self.players:
+        for player in self.players_in:
             self.deal(player.cards)
 
         # To banker
@@ -168,14 +179,14 @@ class Blackjack:
     def is_insurance(self):
 
         if self.banker[1]["symbol"] == "A":
-            for player in self.players:
+            for player in self.players_in:
                 choice = input("Want to buy a insurande?")
                 if choice == "y":
                     player.insurance = True
 
     def check_blackjack(self):
 
-        for player in self.players:
+        for player in self.players_in:
 
             if self.check_cards_blackjack(self.banker):
 
@@ -186,6 +197,14 @@ class Blackjack:
 
             if self.check_cards_blackjack(player.cards):
                 player.result = "win"
+
+    def choice(self):
+
+        for player in self.players_in:
+            choice = input("Your choice?")
+            self.player_choice(choice, player)
+            print(player.cards)
+            print(player.result)
 
     def player_choice(self, choice, player):
 
@@ -207,39 +226,55 @@ class Blackjack:
 
     def double_down(self, player):
 
-        player.bet *= 2
+        player.stake *= 2
         self.deal(player.cards)
 
     def fold(self, player):
 
-        player.money -= player.bet/2
-        player.result = "lose"
+        player.money -= player.stake / 2
+        player.result = "fold"
 
-    # def split():
-    #     pass
+    def banker_time(self):
 
-    # # Game End
-    # def judge():
-    #     pass
-    #
-    # def next():
-    #     pass
-    #
-    # def bet():
-    #     pass
-    #
-    # def stud():
-    #     pass
-    #
-    # def fold():
-    #     pass
-    #
-    # def push():
-    #     pass
-    #
-    # def surrender():
-    #     pass
+        while self.check_sum_switch_ace(self.banker) < 17:
+            self.deal(self.banker)
+            if self.check_bust(self.banker):
+                return "banker lose"
 
+    def compare_cards(self):
+
+        banker_point = self.check_sum_switch_ace(self.banker)
+        for player in self.players_in:
+
+            player_point = self.check_sum_switch_ace(player.cards)
+            if player_point > banker_point:
+                player.result = "win"
+            elif player_point < banker_point:
+                player.result = "win"
+            else:
+                player.result = "push"
+
+    def give_money(self):
+
+        for player in self.players_in:
+
+            if player.result == "win":
+                player.money += player.stake
+
+            if player.result == "blackjack":
+                player.money += 1.5 * player.stake
+
+            if player.result == "5 card charlie":
+                player.money += 2 * player.stake
+
+            if player.result == "lose":
+
+                player.money -= player.stake
+
+
+
+            if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
+                player.money += player.stake
 
 if __name__ == "__main__":
     game = Blackjack()
