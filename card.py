@@ -14,7 +14,6 @@ class Card:
         self.value = poker_value_dict[symbol]
         self.faced = faced
 
-
 class Deck:
 
     def __init__(self, deck_num):

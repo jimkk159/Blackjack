@@ -1,3 +1,12 @@
+class Hand:
+
+    def __init__(self):
+        # self.id = id_
+        self.cards = []
+        self._5_card_charlie = False
+        self.result = ""
+
+
 class Player:
 
     def __init__(self, id_, money=100, init_stake=5):
@@ -8,29 +17,35 @@ class Player:
         self.fold = False
         self.double = False
         self.insurance = False
-        self._5_card_charlie = False
-        self.result = ""
 
     def print_cards(self):
         print(f"Player {self.id}:")
-        for card in self.hands:
-            print(f"{card.symbol} {card.suit} ", end="")
+        for hand in self.hands:
+            for card in hand.cards:
+                print(f"{card.symbol} {card.suit} ", end="")
+            print(" | ", end="")
         print()
 
     def print_money(self):
         print(f"Player {self.id} has {self.money}")
 
     def print_result(self):
-        print(f"Player {self.id} result is {self.result}")
+        print(f"Player {self.id} result is", end="")
+        for hand in self.hands:
+            print(f" {hand.result}", end="")
+        print()
 
     def print_status(self):
         print(f"Player {self.id} has:")
-        print(f"money: {self.money} ", end="")
-        print(f"stake: {self.stake} ", end="")
+        print(f"money: {self.money} ")
+        print(f"stake: {self.stake} ")
         print(f"cards: ", end="")
-        for card in self.hands:
-            print(f"{card.symbol} {card.suit} ", end="")
+        for hand in self.hands:
+            for card in hand.cards:
+                print(f"{card.symbol} {card.suit} ", end="")
+            print(" | ", end="")
         print()
+
 
 class Players:
 
@@ -52,11 +67,11 @@ class Players:
 
         self.enter()
         self.set_stake(min_bet)
-        self.reset_result()
+        self.pay_stake()
         self.reset_double()
         self.reset_fold()
         self.reset_insurance()
-        self.reset_cards()
+        self.reset_hands()
 
     # Enter table
     def enter(self):
@@ -83,11 +98,11 @@ class Players:
                     continue
                 break
 
-    # Reset Result
-    def reset_result(self):
+    # Pay Stake
+    def pay_stake(self):
 
         for player in self.in_:
-            player.result = ""
+            player.money -= player.stake
 
     # Reset Double
     def reset_double(self):
@@ -114,11 +129,11 @@ class Players:
             player._5_card_charlie = False
 
     # Reset Cards in hand
-    def reset_cards(self):
+    def reset_hands(self):
 
         # Reset Player
         for player in self.in_:
-            player.hands = []
+            player.hands = [Hand()]
 
     # People who win or lose
     def leave_game(self):
@@ -127,7 +142,7 @@ class Players:
         # out_game = filter(lambda x: x.result != "")
         for player in self.in_:
 
-            if player.result != "":
+            if not any(map(lambda x: x.result == "", player.hands)):
                 out_game.append(player.id)
 
         while out_game:
@@ -153,13 +168,17 @@ class Players:
             player.print_money()
 
     # Print Players Status
-    def print_all_status(self):
+    def print_all_status(self, choice="in"):
 
-        for player in self.in_:
+        array = self.in_
+        if choice == "out":
+            array = self.out
+
+        for player in array:
             player.print_status()
 
     # Print Players Result
     def print_all_result(self):
 
-        for player in self.in_:
+        for player in self.out:
             player.print_result()
