@@ -52,27 +52,30 @@ class Blackjack:
         while self.game_end:
             self.game_restart()
 
+            # self.banker = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
+            #                             {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
             self.players_in[0].cards = [{'symbol': 'Q', 'suit': 'spade', 'value': 10, 'faced': True},
                                         {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
-            self.players_in[2].cards = [{'symbol': 'J', 'suit': 'spade', 'value': 10, 'faced': True},
-                                        {'symbol': 'A', 'suit': 'heart', 'value': 11, 'faced': True}]
+
             print(self.banker)
             print(self.players_in[0].cards)
             print(self.players_in[1].cards)
             print(self.players_in[2].cards)
             self.is_insurance()
             self.check_blackjack()
+            self.out_game_player()
             print()
             print(len(self.players_in))
             print(len(self.players_out))
 
             self.choice()
+            self.out_game_player()
             if self.banker_time() == "banker lose":
                 # Return money to players
                 pass
 
             self.compare_cards()
-            self.give_money()
+            self.out_game_player()
             self.game_end = False
 
     def create_player(self, player_num):
@@ -115,7 +118,7 @@ class Blackjack:
         for player in self.players_in:
 
             while True:
-                player.stake = int(input("How much money do you want to bet?"))
+                # player.stake = int(input("How much money do you want to bet?"))
 
                 # Check Player bet
                 if player.stake >= player.money:
@@ -209,13 +212,13 @@ class Blackjack:
 
         if self.banker[1]["symbol"] == "A":
             for player in self.players_in:
-                choice = input("Want to buy a insurande?")
-                if choice == "y":
-                    player.insurance = True
+                # choice = input("Want to buy a insurande?")
+                # if choice == "y":
+                #     player.insurance = True
+                pass
 
     def check_blackjack(self):
 
-        out_game = []
         for player in self.players_in:
 
             if self.check_cards_blackjack(self.banker):
@@ -227,20 +230,25 @@ class Blackjack:
 
             if self.check_cards_blackjack(player.cards):
                 player.result = "blackjack"
+
+    def out_game_player(self):
+
+        out_game = []
+        for player in self.players_in:
+
+            if player.result != "":
                 out_game.append(player.id)
 
-        self.player_rest(out_game)
-
-    def player_rest(self, players_out):
-
-        while players_out:
-            out_player_id = players_out.pop()
+        while out_game:
+            out_player_id = out_game.pop()
             pick_id = 0
             for num in range(len(self.players_in)):
                 if self.players_in[num].id == out_player_id:
                     pick_id = num
                     break
-            self.players_out.append(self.players_in.pop(pick_id))
+            out_game_player = self.players_in.pop(pick_id)
+            self.players_out.append(out_game_player)
+            self.give_money()
 
     def choice(self):
 
@@ -249,16 +257,19 @@ class Blackjack:
             self.player_choice(choice, player)
             print(player.cards)
             print(player.result)
+        self.out_game_player()
 
     def player_choice(self, choice, player):
 
-        if choice == "double":
+        if choice == "double" and self.check_sum_switch_ace(player.cards) == 11:
             self.double_down(player)
+            if self.check_bust(player.cards):
+                player.result = "lose"
 
-        if choice == "fold":
+        elif choice == "fold":
             self.fold(player)
 
-        if choice == "hit":
+        elif choice == "hit":
             while True:
                 self.deal(player.cards)
                 if self.check_bust(player.cards):
@@ -266,6 +277,10 @@ class Blackjack:
                     break
                 if input("Another Card?") != "y":
                     break
+
+        elif choice == "split":
+            pass
+
         # self.split(player)
 
     def double_down(self, player):
@@ -274,8 +289,6 @@ class Blackjack:
         self.deal(player.cards)
 
     def fold(self, player):
-
-        player.money -= player.stake / 2
         player.result = "fold"
 
     def banker_time(self):
@@ -298,24 +311,25 @@ class Blackjack:
             else:
                 player.result = "push"
 
-    def give_money(self):
+    def give_money(self, player):
 
-        for player in self.players_in:
+        if player.result == "win":
+            player.money += player.stake
 
-            if player.result == "win":
-                player.money += player.stake
+        if player.result == "blackjack":
+            player.money += 1.5 * player.stake
 
-            if player.result == "blackjack":
-                player.money += 1.5 * player.stake
+        if player.result == "5 card charlie":
+            player.money += 2 * player.stake
 
-            if player.result == "5 card charlie":
-                player.money += 2 * player.stake
+        if player.result == "lose":
+            player.money -= player.stake
 
-            if player.result == "lose":
-                player.money -= player.stake
+        if player.result == "fold":
+            player.money -= int(player.stake/2)
 
-            if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
-                player.money += player.stake
+        if self.check_sum_switch_ace(self.banker) == 21 and player.insurance:
+            player.money += player.stake
 
 
 if __name__ == "__main__":
