@@ -15,7 +15,7 @@ class Blackjack:
         self.deck.shuffle()
 
         # Setting Player
-        self.player_num = 1
+        self.player_num = 2
         self.players = Players(self.player_num)
 
         # Setting Banker
@@ -31,8 +31,8 @@ class Blackjack:
             self.game_restart()
             # self.banker = [Card(symbol='K', suit='spade'),
             #                Card(symbol='A', suit='heart')]
-            self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-                                                  Card(symbol='A', suit='heart')]
+            # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+            #                                       Card(symbol='A', suit='heart')]
 
             print("*" * 20)
             print("New Round Begin")
@@ -198,7 +198,14 @@ class Blackjack:
             else:
 
                 hand_count = 0
-                while hand_count < len(player.hands):
+                while True:
+
+                    # print("-----------------------------")
+                    # print("hand_count", hand_count, len(player.hands))
+
+                    if hand_count >= len(player.hands):
+                        print("break")
+                        break
 
                     while True:
 
@@ -212,18 +219,25 @@ class Blackjack:
                             player.hands.append(split_hand)
 
                         if choice == "stand":
+                            choice = ""
                             break
 
                         if choice == "hit":
                             self.hit(player.hands[hand_count])
 
                         self.players.print_all_status()
+                        print("Bust?", hand_count, self.check_bust(player.hands[hand_count].cards))
                         if self.check_bust(player.hands[hand_count].cards):
-                            print("bust")
+                            print("This hand is bust")
+                            choice = ""
                             player.hands[hand_count].result = "lose"
                             break
                         choice = input(f"Player {player.id} choice?")
+
                     hand_count += 1
+        # print("-----------------------------")
+        # print("This is outside")
+        # print("-----------------------------")
 
     def double_down(self, player):
 
