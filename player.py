@@ -3,6 +3,7 @@ class Hand:
     def __init__(self):
         # self.id = id_
         self.cards = []
+        self.is_ace_split = False
         self._5_card_charlie = False
         self.result = ""
 

@@ -31,8 +31,8 @@ class Blackjack:
             self.game_restart()
             # self.banker = [Card(symbol='K', suit='spade'),
             #                Card(symbol='A', suit='heart')]
-            # self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
-            #                                       Card(symbol='A', suit='heart')]
+            self.players.in_[0].hands[0].cards = [Card(symbol='A', suit='spade'),
+                                                  Card(symbol='A', suit='heart')]
 
             print("*" * 20)
             print("New Round Begin")
@@ -188,6 +188,7 @@ class Blackjack:
 
         if not player.fold:
 
+            print()
             choice = input(f"Player {player.id} choice?")
             if choice == "double" and len(player.hands[0].cards) == 2 and player.money >= player.stake:
 
@@ -213,9 +214,14 @@ class Blackjack:
                                 and len(player.hands[hand_count].cards) == 2 \
                                 and player.hands[hand_count].cards[0].symbol == player.hands[hand_count].cards[1].symbol \
                                 and player.money >= player.stake:
+
                             player.money -= player.stake
                             split_hand = Hand()
                             split_hand.cards.append(player.hands[hand_count].cards.pop())
+
+                            player.hands[hand_count].is_ace_split = True
+                            split_hand.is_ace_split = True
+
                             player.hands.append(split_hand)
 
                         if choice == "stand":
@@ -224,7 +230,11 @@ class Blackjack:
 
                         if choice == "hit":
                             self.hit(player.hands[hand_count])
+                            if player.hands[hand_count].is_ace_split:
+                                choice = ""
+                                break
 
+                        print()
                         self.players.print_all_status()
                         print("Bust?", hand_count, self.check_bust(player.hands[hand_count].cards))
                         if self.check_bust(player.hands[hand_count].cards):
@@ -232,7 +242,7 @@ class Blackjack:
                             choice = ""
                             player.hands[hand_count].result = "lose"
                             break
-                        choice = input(f"Player {player.id} choice?")
+                        choice = input(f"Player {player.id} Hand {hand_count} choice?")
 
                     hand_count += 1
         # print("-----------------------------")
